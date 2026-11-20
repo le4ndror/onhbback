@@ -1,0 +1,5 @@
+__pycache__/
+dados/*.bak
+dados/*.backup-*
+dados/*.sqlite3-wal
+dados/*.sqlite3-shm
