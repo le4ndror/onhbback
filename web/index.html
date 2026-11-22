@@ -826,18 +826,16 @@
       .header-actions > * + * { margin-left: .25rem; }
 
       .hero-section { padding-block: 1.5rem; }
-      .hero-folder-stage { min-height: 0; padding-bottom: 5.25rem; }
+      .hero-folder-stage { min-height: clamp(5.5rem, 18vw, 7.5rem); padding-block: .5rem; }
       #titleText { white-space: normal; font-size: clamp(1.4rem, 6vw, 2.25rem); }
       .hero-folder-stage .folder-wrapper {
-        top: auto;
-        bottom: .625rem;
         animation-name: mobileFolderMove;
       }
       .hero-folder-stage .folder-icon { width: clamp(3rem, 13vw, 4.25rem); }
       @keyframes mobileFolderMove {
-        0% { transform: translateX(calc(-50% - 29vw)) rotate(-6deg); }
-        50% { transform: translateX(-50%) rotate(3deg); }
-        100% { transform: translateX(calc(-50% + 29vw)) rotate(8deg); }
+        0% { transform: translate(calc(-50% - 29vw), -50%) rotate(-6deg); }
+        50% { transform: translate(-50%, -50%) rotate(3deg); }
+        100% { transform: translate(calc(-50% + 29vw), -50%) rotate(8deg); }
       }
       .search-wrapper.active .input-holder { width: min(28rem, calc(100vw - 4.5rem)); }
       .search-wrapper.active .close { right: -1.875rem; }
@@ -938,7 +936,7 @@
         align-items: stretch;
         min-width: 0;
         min-height: 0;
-        border-radius: .65rem;
+        border-radius: .5rem;
         box-shadow: 0 .25rem .65rem #0006;
         transform: none;
       }
@@ -946,16 +944,39 @@
       .mobile-question {
         display: flex;
         flex-direction: column;
-        align-items: start;
-        gap: .35rem;
         width: 100%;
-        min-height: 7.5rem;
-        padding: .5rem .375rem;
         text-align: left;
         color: #f3f4f6;
         overflow-wrap: anywhere;
         font-size: .6875rem;
         line-height: 1.3;
+      }
+      .mobile-question-cover {
+        position: relative;
+        display: grid;
+        place-items: center;
+        width: 100%;
+        aspect-ratio: 3 / 2;
+        max-height: 7rem;
+        flex: none;
+        overflow: hidden;
+        background: #0c233380;
+        border-bottom: 1px solid #ffffff20;
+        color: #a5e3ef;
+        font-size: 1.25rem;
+      }
+      .mobile-question-cover img {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+      .mobile-question-content {
+        display: flex;
+        flex-direction: column;
+        gap: .3rem;
+        padding: .5rem .375rem;
       }
       .mobile-question strong { font-size: .75rem; color: #fff; }
       .mobile-question-context, .mobile-question-preview {
@@ -972,7 +993,7 @@
       @media (prefers-reduced-motion: reduce) {
         #mobileFilters[open], .hero-folder-stage .folder-wrapper, .hero-folder-stage .folder-inner,
         .site-brand .dropping-texts > div { animation: none; }
-        .hero-folder-stage .folder-wrapper { transform: translateX(-50%); }
+        .hero-folder-stage .folder-wrapper { transform: translate(-50%, -50%); opacity: .35; }
       }
     }
   </style>
@@ -1462,6 +1483,6 @@
     </div>
   </footer>
 
-  <script src="leiah.js?v=7"></script>
+  <script src="leiah.js?v=8"></script>
 </body>
 </html>

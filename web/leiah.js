@@ -522,6 +522,10 @@ function renderQuestionCards(items) {
     var isSelected = q.id === currentSelectedId ? "active-selected" : "";
     var theme = themeStyles[idx % themeStyles.length];
     var iconClass = themeIcons[idx % themeIcons.length];
+    var mobileCover = q.img
+      ? '<picture class="mobile-question-cover"><source media="(width < 640px)" srcset="' + esc(q.img) +
+        '"><img alt="" loading="lazy" decoding="async"></picture>'
+      : '<span class="mobile-question-cover" aria-hidden="true"><i class="' + iconClass + '"></i></span>';
     var tagsHTML = q.tags.slice(0, 4).map(function (t) {
       return '<span class="bg-black/30 text-gray-200 text-[10px] font-semibold px-2 py-0.5 rounded border border-white/10 mr-1">' +
         esc(t) + "</span>";
@@ -531,9 +535,10 @@ function renderQuestionCards(items) {
       '" onclick="selectQuestion(' + q.id + ')" data-id="' + q.id + '">' +
       '<button type="button" class="mobile-only mobile-question" aria-haspopup="dialog" aria-controls="mobileMetadata" ' +
       'onclick="event.stopPropagation(); selectQuestion(' + q.id + ', this)">' +
+      mobileCover + '<span class="mobile-question-content">' +
       '<span class="mobile-question-context">' + esc(q.edicaoAno || "—") + " · " + esc(q.phase) + "</span>" +
       "<strong>" + esc((q.category === "Tarefa" ? "Tarefa " : "Questão ") + q.num) + "</strong>" +
-      '<span class="mobile-question-preview">' + esc(q.descShort) + "</span></button>" +
+      '<span class="mobile-question-preview">' + esc(q.descShort) + "</span></span></button>" +
       '<div class="card-header">' +
       '<span class="text-[10px] font-bold text-gray-200 uppercase bg-black/40 px-2.5 py-1 rounded border border-white/10 backdrop-blur-sm">' +
       "ONHB · " + esc(q.edicaoAno || "—") + " · " + esc(q.phase) + "</span>" +
