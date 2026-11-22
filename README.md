@@ -1,6 +1,6 @@
 # Repositório ONHB
 
-O Node.js serve o site (`web/`) e a API no mesmo endereço. A API abre `dados/db.sqlite3` somente para leitura: não cria tabelas, não importa CSVs e não regrava dados na inicialização. O navegador carrega os filtros e pede apenas seis questões por página; busca, filtros, ordenação e paginação são feitos no servidor.
+O Node.js serve o site (`web/`) e a API no mesmo endereço. A API abre `dados/db.sqlite3` somente para leitura: não cria tabelas, não importa CSVs e não regrava dados na inicialização. O navegador carrega os filtros e pede até 15 questões por página no celular e seis nas demais telas; busca, filtros, ordenação e paginação são feitos no servidor.
 
 ## Executar localmente
 

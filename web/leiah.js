@@ -110,7 +110,7 @@ var QUESTIONS_DATA = [];
 var currentSelectedId = null;
 var modalSelectedId = null;
 var currentPage = 1;
-var itemsPerPage = 6;
+var itemsPerPage = mobileLayout.matches ? 15 : 6;
 
 var filterState = {
   searchQuery: "",
@@ -314,6 +314,13 @@ function resetCustomDropdowns() {
 document.addEventListener("DOMContentLoaded", function () {
   setupMobilePanels();
   setupCustomAnimatedDropdowns();
+
+  mobileLayout.addEventListener("change", function () {
+    var firstResult = (currentPage - 1) * itemsPerPage;
+    itemsPerPage = mobileLayout.matches ? 15 : 6;
+    currentPage = Math.floor(firstResult / itemsPerPage) + 1;
+    pesquisarNoBanco();
+  });
 
   var scrollObserver = new IntersectionObserver(function (entries, observer) {
     entries.forEach(function (entry) {
