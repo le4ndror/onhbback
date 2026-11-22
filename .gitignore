@@ -1,5 +1,9 @@
+<<<<<<< HEAD
 __pycache__/
 dados/*.bak
 dados/*.backup-*
 dados/*.sqlite3-wal
 dados/*.sqlite3-shm
+=======
+
+>>>>>>> 9b7b4f6c474a037f4426e575ac6916f7689a7330

@@ -763,6 +763,18 @@
       pointer-events: auto;
     }
 
+    .panel-card-custom:has(#wrapperEdicao.open, #wrapperSort.open) {
+      overflow: visible;
+      z-index: 20;
+    }
+
+    #wrapperEdicao .custom-options-menu,
+    #wrapperSort .custom-options-menu {
+      max-height: min(16rem, 45vh);
+      overflow-y: auto;
+      overscroll-behavior-y: contain;
+    }
+
     /* Itens de opção do menu */
     .custom-option {
       padding: 0.65rem 0.9rem;
