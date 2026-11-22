@@ -53,6 +53,42 @@ test('site e API consultam o SQLite existente', async t => {
     const tagged = await json('/api/questoes?tag=' + tag.id);
     assert.ok(tagged.questions.length);
     assert.ok(tagged.questions.every(q => q.tags.some(item => item.id === tag.id)));
+    const edition2024 = '/api/questoes?edicao=2024&pageSize=100';
+    const idsFor = result => result.questions.map(q => q.id);
+    const culturaMaterial = idsFor(await json(edition2024 + '&tag=12'));
+    const historiografia = idsFor(await json(edition2024 + '&tag=53'));
+    assert.ok(culturaMaterial.some(id => historiografia.includes(id)));
+    assert.ok(culturaMaterial.some(id => !historiografia.includes(id)));
+    assert.ok(historiografia.some(id => !culturaMaterial.includes(id)));
+    const union = new Set([...culturaMaterial, ...historiografia]);
+    const eitherTag = await json(edition2024 + '&tag=12&tag=53');
+    assert.equal(eitherTag.total, union.size);
+    assert.equal(eitherTag.questions.length, union.size);
+    assert.deepEqual(new Set(idsFor(eitherTag)), union);
+
+    const searchAll = async (query, filters = {}) => {
+      const params = new URLSearchParams({ q: query, pageSize: '100', ...filters });
+      const result = await json('/api/questoes?' + params);
+      const questions = result.questions;
+      for (let page = 2; page <= Math.ceil(result.total / result.pageSize); page++) {
+        params.set('page', page);
+        questions.push(...(await json('/api/questoes?' + params)).questions);
+      }
+      assert.equal(questions.length, result.total);
+      assert.equal(new Set(idsFor(result)).size, result.total);
+      return questions;
+    };
+    const abolicao = await searchAll('abolição');
+    const aids = await searchAll('AIDS');
+    assert.ok(abolicao.length > 0 && aids.length > 0);
+    const eitherTheme = await searchAll('aboliçao e aids');
+    const questionIds = questions => new Set(questions.map(q => q.id));
+    const expected = [...abolicao, ...aids];
+    assert.deepEqual(questionIds(eitherTheme), questionIds(expected));
+    const edicao = aids[0].edicao_ano;
+    assert.deepEqual(questionIds(await searchAll('abolição, AIDS', { edicao })),
+      questionIds(expected.filter(q => q.edicao_ano === edicao)));
+
     const sorted = await json('/api/questoes?yearStart=1500&yearEnd=1900&sort=yearDesc');
     const years = sorted.questions.map(q => q.ano_historico);
     assert.ok(years.length);

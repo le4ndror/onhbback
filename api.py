@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 import json
 import os
+import re
 import sqlite3
+import unicodedata
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import parse_qs, urlparse
 
@@ -9,6 +11,13 @@ PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
 WEB_DIR = os.path.join(PROJECT_DIR, "web")
 DATABASE = os.path.join(PROJECT_DIR, "dados", "db.sqlite3")
 PAGE_SIZE = 100
+
+
+def normalize_search(value):
+    return "".join(
+        char for char in unicodedata.normalize("NFD", value or "")
+        if not unicodedata.category(char).startswith("M")
+    ).lower()
 
 
 def all_rows(connection, query, parameters=()):
@@ -94,17 +103,29 @@ class Handler(SimpleHTTPRequestHandler):
                 else:
                     filters = []
                     values = []
-                    query = params.get("q", [""])[0].strip()
+                    query = params.get("q", [""])[0]
+                    terms = list(dict.fromkeys(
+                        part.strip() for part in re.split(r"\s+(?:e|ou)\s+|[,;]", query, flags=re.IGNORECASE)
+                        if part.strip()
+                    ))
+                    if len(terms) > 20:
+                        self.send_error(400, "Busque ate 20 temas de uma vez.")
+                        return
                     category = params.get("categoria", [""])[0].strip()
                     phase = params.get("fase", [""])[0].strip()
                     period = params.get("periodo", [""])[0].strip()
                     edition = params.get("edicao", [""])[0].strip()
                     sort = params.get("sort", ["relevant"])[0]
                     tag_ids = [int(tag_id) for tag_id in params.get("tag", []) if tag_id.isdigit()]
-                    if query:
-                        term = "%" + query + "%"
-                        filters.append("(q.enunciado LIKE ? OR EXISTS (SELECT 1 FROM SKYNET_item i WHERE i.id_questao_id = q.id_questao AND i.texto LIKE ?) OR EXISTS (SELECT 1 FROM SKYNET_questao_documentos qd JOIN SKYNET_documento d ON d.id_documento = qd.documento_id WHERE qd.questao_id = q.id_questao AND d.nome_documento LIKE ?) OR EXISTS (SELECT 1 FROM SKYNET_questao_tags qt JOIN SKYNET_tag tg ON tg.id_tag = qt.tag_id WHERE qt.questao_id = q.id_questao AND tg.tag_nome LIKE ?))")
-                        values.extend([term] * 4)
+                    if terms:
+                        connection.create_function("normalizar", 1, normalize_search, deterministic=True)
+                        theme_match = """(instr(normalizar(q.enunciado), ?) > 0
+                            OR EXISTS (SELECT 1 FROM SKYNET_item i WHERE i.id_questao_id = q.id_questao AND instr(normalizar(i.texto), ?) > 0)
+                            OR EXISTS (SELECT 1 FROM SKYNET_questao_documentos qd JOIN SKYNET_documento d ON d.id_documento = qd.documento_id WHERE qd.questao_id = q.id_questao AND instr(normalizar(d.nome_documento), ?) > 0)
+                            OR EXISTS (SELECT 1 FROM SKYNET_questao_tags qt JOIN SKYNET_tag tg ON tg.id_tag = qt.tag_id WHERE qt.questao_id = q.id_questao AND instr(normalizar(tg.tag_nome), ?) > 0))"""
+                        filters.append(" OR ".join([theme_match] * len(terms)))
+                        for term in terms:
+                            values.extend([normalize_search(term)] * 4)
                     if category:
                         filters.append("t.tipo_nome = ?")
                         values.append(category)
@@ -117,9 +138,10 @@ class Handler(SimpleHTTPRequestHandler):
                     if edition:
                         filters.append("e.ano_edicao = ?")
                         values.append(edition)
-                    for tag_id in tag_ids:
-                        filters.append("EXISTS (SELECT 1 FROM SKYNET_questao_tags qt WHERE qt.questao_id = q.id_questao AND qt.tag_id = ?)")
-                        values.append(tag_id)
+                    if tag_ids:
+                        marks = ",".join("?" for _ in tag_ids)
+                        filters.append(f"EXISTS (SELECT 1 FROM SKYNET_questao_tags qt WHERE qt.questao_id = q.id_questao AND qt.tag_id IN ({marks}))")
+                        values.extend(tag_ids)
                     where = " WHERE " + " AND ".join("(" + clause + ")" for clause in filters) if filters else ""
                     base = """
                         FROM SKYNET_questao AS q

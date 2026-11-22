@@ -810,6 +810,171 @@
       font-size: 0.75rem;
       color: #38bdf8;
     }
+
+    .mobile-only { display: none; }
+
+    @media (width < 640px) {
+      .site-brand > svg { width: 1.75rem; flex-shrink: 0; }
+      .site-brand > div { margin-left: .375rem; }
+      .site-brand .brand-name { font-size: 1.15rem; }
+      .site-brand .dropping-texts-container {
+        display: inline-flex;
+        width: 3.5rem;
+        margin-left: .25rem;
+      }
+      .site-brand .dropping-texts { transform: scale(.85); transform-origin: left center; }
+      .header-actions > * + * { margin-left: .25rem; }
+
+      .hero-section { padding-block: 1.5rem; }
+      .hero-folder-stage { min-height: 0; padding-bottom: 5.25rem; }
+      #titleText { white-space: normal; font-size: clamp(1.4rem, 6vw, 2.25rem); }
+      .hero-folder-stage .folder-wrapper {
+        top: auto;
+        bottom: .625rem;
+        animation-name: mobileFolderMove;
+      }
+      .hero-folder-stage .folder-icon { width: clamp(3rem, 13vw, 4.25rem); }
+      @keyframes mobileFolderMove {
+        0% { transform: translateX(calc(-50% - 29vw)) rotate(-6deg); }
+        50% { transform: translateX(-50%) rotate(3deg); }
+        100% { transform: translateX(calc(-50% + 29vw)) rotate(8deg); }
+      }
+      .search-wrapper.active .input-holder { width: min(28rem, calc(100vw - 4.5rem)); }
+      .search-wrapper.active .close { right: -1.875rem; }
+
+      #repositorio { padding: 1rem .625rem; }
+      #filterSidebar, #metadataSidebar { display: none; }
+      #resultsSection { min-width: 0; }
+      #resultsSection > .panel-card-custom { padding: .75rem; }
+      .results-intro { display: flex; align-items: center; gap: .75rem; }
+      .results-intro h2 { font-size: .95rem; }
+      #paginationBar { flex-wrap: wrap; row-gap: .375rem; }
+
+      #mobileFiltersBtn, .mobile-panel-close {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: .5rem;
+        min-height: 2.75rem;
+        border: 1px solid rgba(42, 139, 158, .65);
+        background: #134e5e;
+        color: #fff;
+        font-size: .8rem;
+        font-weight: 700;
+      }
+      #mobileFiltersBtn {
+        flex: none;
+        padding-inline: .625rem;
+        border-radius: .5rem;
+      }
+      .mobile-panel-close {
+        width: 2.75rem;
+        flex: none;
+        border-radius: .5rem;
+        font-size: 1.25rem;
+      }
+      .mobile-panel[open] {
+        display: block;
+        box-sizing: border-box;
+        padding: 0;
+        overflow: auto;
+        overscroll-behavior: contain;
+        background: #181916;
+        color: #f3f4f6;
+      }
+      .mobile-panel::backdrop { background: #000a; }
+      #mobileFilters[open] {
+        inset: 0 auto 0 0;
+        margin: 0;
+        width: min(23rem, calc(100vw - 1.75rem));
+        max-width: none;
+        height: 100%;
+        max-height: 100dvh;
+        border-radius: 0 1rem 1rem 0;
+        border-right: 1px solid #2a8b9e;
+        animation: openFilterDrawer .22s ease-out;
+      }
+      @keyframes openFilterDrawer {
+        from { transform: translateX(-100%); }
+      }
+      #mobileMetadata[open] {
+        inset: auto 0 calc(.5rem + env(safe-area-inset-bottom));
+        width: min(28rem, calc(100vw - 1rem));
+        max-height: 78dvh;
+        border: 1px solid #8a105b;
+        border-radius: 1rem;
+      }
+      .mobile-panel > .panel-card-custom {
+        position: static;
+        padding: 1rem;
+        border: 0;
+        box-shadow: none;
+        overflow: visible;
+      }
+      #metadataPanel td, #questionModal { overflow-wrap: anywhere; }
+      #metadataPanel .metadata-heading { gap: .5rem; }
+      #metadataPanel .metadata-heading > span { display: none; }
+      #metadataPanel .metadata-preview:has(.hidden) { display: none; }
+      #mobileFilters .custom-options-menu { display: none; }
+      #mobileFilters .open .custom-options-menu {
+        display: block;
+        position: static;
+        margin-top: .375rem;
+        max-height: min(13rem, 35dvh);
+        overflow-y: auto;
+        overscroll-behavior-y: contain;
+      }
+      body:has(.mobile-panel[open]) { overflow: hidden; }
+
+      #questionsList {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: .375rem;
+      }
+      #questionsList > * { margin: 0; }
+      #questionsList > .panel-card-custom { grid-column: 1 / -1; }
+      #questionsList .card-custom {
+        display: flex;
+        align-items: stretch;
+        min-width: 0;
+        min-height: 0;
+        border-radius: .65rem;
+        box-shadow: 0 .25rem .65rem #0006;
+        transform: none;
+      }
+      #questionsList .card-header, #questionsList .card-body { display: none; }
+      .mobile-question {
+        display: flex;
+        flex-direction: column;
+        align-items: start;
+        gap: .35rem;
+        width: 100%;
+        min-height: 7.5rem;
+        padding: .5rem .375rem;
+        text-align: left;
+        color: #f3f4f6;
+        overflow-wrap: anywhere;
+        font-size: .6875rem;
+        line-height: 1.3;
+      }
+      .mobile-question strong { font-size: .75rem; color: #fff; }
+      .mobile-question-context, .mobile-question-preview {
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+        overflow: hidden;
+      }
+      .mobile-question-context { color: #a5e3ef; }
+      .mobile-question:focus-visible { outline: 2px solid #5eead4; outline-offset: -3px; }
+      #questionModal > div { padding: 1rem; max-height: 90dvh; }
+      #toastNotification { pointer-events: none; }
+
+      @media (prefers-reduced-motion: reduce) {
+        #mobileFilters[open], .hero-folder-stage .folder-wrapper, .hero-folder-stage .folder-inner,
+        .site-brand .dropping-texts > div { animation: none; }
+        .hero-folder-stage .folder-wrapper { transform: translateX(-50%); }
+      }
+    }
   </style>
 </head>
 <body class="min-h-screen flex flex-col justify-between font-sans bg-[#1c1d1a] text-gray-100 selection:bg-leiahTeal selection:text-white">
@@ -819,7 +984,7 @@
       <div class="flex items-center justify-between h-16">
         
         <!-- Vector Logo & Dropping Texts -->
-        <div class="flex items-center space-x-3 cursor-pointer group" onclick="window.scrollTo({top:0, behavior:'smooth'})">
+        <div class="site-brand flex items-center space-x-3 cursor-pointer group" onclick="window.scrollTo({top:0, behavior:'smooth'})">
           <svg class="w-9 h-9 overflow-visible transition-transform group-hover:scale-105 duration-300" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
             <g id="mosaic-head">
               <polygon points="40,20 55,10 60,28" fill="#8A105B" />
@@ -838,7 +1003,7 @@
           </svg>
           
           <div class="flex items-center">
-            <span class="text-2xl font-display font-black tracking-tight text-white group-hover:text-teal-300 transition-colors">
+            <span class="brand-name text-2xl font-display font-black tracking-tight text-white group-hover:text-teal-300 transition-colors">
               LEIAH
             </span>
 
@@ -868,7 +1033,7 @@
         </nav>
 
         <!-- Quick Action Shortcuts -->
-        <div class="flex items-center space-x-3">
+        <div class="header-actions flex items-center space-x-3">
           <button id="quickSearchBtn" class="p-2 text-gray-300 hover:text-white transition-colors rounded-lg hover:bg-white/10 flex items-center gap-1.5 text-xs font-medium" title="Atalho de busca (Ctrl+K)">
             <i class="fa-solid fa-magnifying-glass text-base"></i>
             <span class="hidden lg:inline-block bg-white/10 px-1.5 py-0.5 rounded text-[10px] text-gray-400 border border-white/10">⌘K</span>
@@ -883,7 +1048,7 @@
     </div>
   </header>
 
-  <section class="py-10 bg-[#1c1d1a] border-b border-white/10">
+  <section class="hero-section py-10 bg-[#1c1d1a] border-b border-white/10">
     <div class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-4">
       
       <!-- Hero Folder Stage -->
@@ -939,16 +1104,17 @@
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
 
       <!-- LEFT SIDEBAR: FILTERS -->
-      <aside class="lg:col-span-4 space-y-6">
-        <div class="panel-card-custom p-6 space-y-6">
+      <aside id="filterSidebar" class="lg:col-span-4 space-y-6">
+        <div id="filterPanel" class="panel-card-custom p-6 space-y-6">
           
           <div class="flex items-center justify-between pb-3.5 border-b border-white/10">
-            <h2 class="text-lg font-serif font-bold text-gray-100 flex items-center gap-2">
+            <h2 id="filtersHeading" class="text-lg font-serif font-bold text-gray-100 flex items-center gap-2">
               <i class="fa-solid fa-sliders text-teal-400 text-base"></i> Filtros de Busca
             </h2>
             <span id="activeFiltersBadge" class="text-xs font-bold bg-leiahTeal/40 text-teal-200 px-3 py-1 rounded-full border border-teal-500/30">
               0 ativos
             </span>
+            <button type="button" class="mobile-only mobile-panel-close" aria-label="Fechar filtros">×</button>
           </div>
 
           <!-- Filter: Question category -->
@@ -1087,16 +1253,21 @@
         </div>
       </aside>
 
-      <section class="lg:col-span-5 space-y-4">
+      <section id="resultsSection" class="lg:col-span-5 space-y-4">
         
         <!-- Results Header & Sorting -->
         <div class="panel-card-custom blue p-4 space-y-3">
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-            <div>
-              <h2 class="text-lg font-serif font-bold text-gray-100 flex items-center gap-2">
-                <i class="fa-regular fa-folder-open text-teal-400"></i> Questões Encontradas
-              </h2>
-              <p id="totalQuestionsCount" class="text-xs text-gray-300 font-medium">Carregando questões...</p>
+            <div class="results-intro">
+              <button id="mobileFiltersBtn" type="button" class="mobile-only" aria-haspopup="dialog" aria-controls="mobileFilters" aria-expanded="false">
+                <i class="fa-solid fa-sliders" aria-hidden="true"></i> Filtros
+              </button>
+              <div>
+                <h2 class="text-lg font-serif font-bold text-gray-100 flex items-center gap-2">
+                  <i class="fa-regular fa-folder-open text-teal-400"></i> Questões Encontradas
+                </h2>
+                <p id="totalQuestionsCount" class="text-xs text-gray-300 font-medium">Carregando questões...</p>
+              </div>
             </div>
 
             <div class="flex items-center space-x-2 text-xs text-gray-300">
@@ -1135,20 +1306,21 @@
 
       </section>
 
-      <aside class="lg:col-span-3 space-y-6">
-        <div class="panel-card-custom magenta p-5 space-y-4 sticky top-20">
+      <aside id="metadataSidebar" class="lg:col-span-3 space-y-6">
+        <div id="metadataPanel" class="panel-card-custom magenta p-5 space-y-4 sticky top-20">
           
-          <div class="flex items-center justify-between pb-3 border-b border-white/10">
-            <h2 class="text-base font-serif font-bold text-gray-100 flex items-center gap-2">
+          <div class="metadata-heading flex items-center justify-between pb-3 border-b border-white/10">
+            <h2 id="metadataHeading" class="text-base font-serif font-bold text-gray-100 flex items-center gap-2">
               <i class="fa-regular fa-file-lines text-teal-400"></i> Metadados
             </h2>
             <span class="text-[10px] font-semibold uppercase text-gray-400 tracking-wider bg-gray-800/80 px-2 py-0.5 rounded border border-gray-700">
               Inspetor
             </span>
+            <button type="button" class="mobile-only mobile-panel-close" aria-label="Fechar metadados">×</button>
           </div>
 
           <!-- Document Image Preview -->
-          <div class="relative overflow-hidden rounded-lg border border-gray-700 bg-gray-900 shadow-inner group">
+          <div class="metadata-preview relative overflow-hidden rounded-lg border border-gray-700 bg-gray-900 shadow-inner group">
             <img id="metaImage" alt="Documento Selecionado" class="hidden doc-preview-img w-full h-44 object-contain">
             <div class="absolute bottom-2 right-2 bg-black/80 text-white text-[10px] font-medium px-2 py-0.5 rounded backdrop-blur-sm border border-white/10">
               <i class="fa-solid fa-magnifying-glass-plus mr-1 text-teal-400"></i> Fonte Primária
@@ -1215,6 +1387,9 @@
     </div>
   </main>
 
+  <dialog id="mobileFilters" class="mobile-panel" aria-labelledby="filtersHeading"></dialog>
+  <dialog id="mobileMetadata" class="mobile-panel" aria-labelledby="metadataHeading"></dialog>
+
   <div id="questionModal" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-[#22231f] rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-white/10 p-6 space-y-5 text-gray-100">
       
@@ -1227,7 +1402,7 @@
             --
           </h2>
         </div>
-        <button onclick="closeQuestionModal()" class="text-gray-400 hover:text-white text-lg p-1.5 rounded-lg hover:bg-gray-700 transition-colors">
+        <button id="questionModalClose" onclick="closeQuestionModal()" aria-label="Fechar questão completa" class="text-gray-400 hover:text-white text-lg p-1.5 rounded-lg hover:bg-gray-700 transition-colors">
           <i class="fa-solid fa-xmark"></i>
         </button>
       </div>
@@ -1287,6 +1462,6 @@
     </div>
   </footer>
 
-  <script src="leiah.js?v=6"></script>
+  <script src="leiah.js?v=7"></script>
 </body>
 </html>

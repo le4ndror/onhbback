@@ -60,15 +60,21 @@ function filtersFor(params) {
   const clauses = [];
   const values = [];
   function add(sql, ...args) { clauses.push(`(${sql})`); values.push(...args); }
-  const term = params.get('q')?.trim();
-  if (term) add(`instr(normalizar(q.enunciado), normalizar(?)) > 0
+  const terms = [...new Set((params.get('q') ?? '').split(/\s+(?:e|ou)\s+|[,;]/i)
+    .map(term => term.trim()).filter(Boolean))];
+  if (terms.length > 20) throw new InvalidQuery('Busque até 20 temas de uma vez.');
+  const themeMatch = `instr(normalizar(q.enunciado), normalizar(?)) > 0
     OR EXISTS (SELECT 1 FROM SKYNET_item i WHERE i.id_questao_id = q.id_questao AND instr(normalizar(i.texto), normalizar(?)) > 0)
     OR EXISTS (SELECT 1 FROM SKYNET_questao_documentos qd JOIN SKYNET_documento d ON d.id_documento = qd.documento_id
       WHERE qd.questao_id = q.id_questao AND instr(normalizar(d.nome_documento || ' ' || COALESCE(d.tipo_documento, '')), normalizar(?)) > 0)
     OR EXISTS (SELECT 1 FROM SKYNET_questao_tags qt JOIN SKYNET_tag tg ON tg.id_tag = qt.tag_id
       WHERE qt.questao_id = q.id_questao AND instr(normalizar(tg.tag_nome), normalizar(?)) > 0)
     OR EXISTS (SELECT 1 FROM SKYNET_questao_periodos qp JOIN SKYNET_periodo p ON p.id_periodo = qp.periodo_id
-      WHERE qp.questao_id = q.id_questao AND instr(normalizar(p.periodo_nome), normalizar(?)) > 0)`, term, term, term, term, term);
+      WHERE qp.questao_id = q.id_questao AND instr(normalizar(p.periodo_nome), normalizar(?)) > 0)`;
+  if (terms.length) {
+    add(terms.map(() => `(${themeMatch})`).join(' OR '),
+      ...terms.flatMap(term => [term, term, term, term, term]));
+  }
   const category = params.get('categoria');
   const phase = params.get('fase');
   const period = params.get('periodo');
@@ -80,10 +86,15 @@ function filtersFor(params) {
   if (edition) add('e.ano_edicao = ?', edition);
   const tags = [...new Set(params.getAll('tag'))];
   if (tags.length > 100) throw new InvalidQuery('Selecione até 100 tags.');
-  for (const tag of tags) {
+  const tagIds = tags.map(tag => {
     const id = integer(new URLSearchParams({ tag }), 'tag', null);
     if (id === null || id < 1) throw new InvalidQuery('Tag inválida.');
-    add('EXISTS (SELECT 1 FROM SKYNET_questao_tags qt WHERE qt.questao_id = q.id_questao AND qt.tag_id = ?)', id);
+    return id;
+  });
+  if (tagIds.length) {
+    const marks = tagIds.map(() => '?').join(',');
+    add(`EXISTS (SELECT 1 FROM SKYNET_questao_tags qt
+      WHERE qt.questao_id = q.id_questao AND qt.tag_id IN (${marks}))`, ...tagIds);
   }
   const start = integer(params, 'yearStart', null);
   const end = integer(params, 'yearEnd', null);

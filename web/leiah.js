@@ -2,6 +2,8 @@
 
 var filtrosAPI = null;
 var controllerBusca = null;
+var mobileLayout = window.matchMedia("(width < 640px)");
+var mobileQuestionTrigger = null;
 
 function esc(valor) {
   return String(valor == null ? "" : valor)
@@ -201,6 +203,54 @@ function popularFiltros() {
 
 /* ================= Dropdowns animados (do layout) ================= */
 
+function openMobilePanel(dialogId, panelId) {
+  var dialog = document.getElementById(dialogId);
+  if (!mobileLayout.matches || dialog.open) return;
+  dialog.appendChild(document.getElementById(panelId));
+  dialog.showModal();
+  dialog.scrollTop = 0;
+}
+
+function setupMobilePanels() {
+  var filtersButton = document.getElementById("mobileFiltersBtn");
+
+  filtersButton.addEventListener("click", function () {
+    openMobilePanel("mobileFilters", "filterPanel");
+    filtersButton.setAttribute("aria-expanded", "true");
+  });
+
+  [
+    ["mobileFilters", "filterPanel", "filterSidebar"],
+    ["mobileMetadata", "metadataPanel", "metadataSidebar"]
+  ].forEach(function (ids) {
+    var dialog = document.getElementById(ids[0]);
+    var panel = document.getElementById(ids[1]);
+    var sidebar = document.getElementById(ids[2]);
+    panel.querySelector(".mobile-panel-close").addEventListener("click", function () {
+      dialog.close();
+    });
+    dialog.addEventListener("click", function (event) {
+      if (event.target !== dialog) return;
+      var rect = dialog.getBoundingClientRect();
+      if (event.clientX < rect.left || event.clientX >= rect.right ||
+          event.clientY < rect.top || event.clientY >= rect.bottom) dialog.close();
+    });
+    dialog.addEventListener("close", function () {
+      if (dialog.open) return;
+      sidebar.appendChild(panel);
+      if (dialog.id === "mobileFilters") {
+        filtersButton.setAttribute("aria-expanded", "false");
+        panel.querySelectorAll(".custom-select-wrapper.open").forEach(function (wrapper) {
+          wrapper.classList.remove("open");
+        });
+      }
+    });
+    mobileLayout.addEventListener("change", function () {
+      if (!mobileLayout.matches && dialog.open) dialog.close();
+    });
+  });
+}
+
 function setupCustomAnimatedDropdowns() {
   var wrappers = document.querySelectorAll(".custom-select-wrapper");
 
@@ -262,6 +312,7 @@ function resetCustomDropdowns() {
 /* ================= Inicializacao ================= */
 
 document.addEventListener("DOMContentLoaded", function () {
+  setupMobilePanels();
   setupCustomAnimatedDropdowns();
 
   var scrollObserver = new IntersectionObserver(function (entries, observer) {
@@ -337,6 +388,8 @@ document.addEventListener("DOMContentLoaded", function () {
     filterState.tags = Array.from(document.querySelectorAll(".filter-tag-checkbox:checked"))
       .map(function (cb) { return cb.value; });
     currentPage = 1;
+    var filterDrawer = document.getElementById("mobileFilters");
+    if (filterDrawer.open) filterDrawer.close();
     pesquisarNoBanco();
     showNotification("Filtros aplicados com sucesso!");
   });
@@ -426,6 +479,10 @@ async function pesquisarNoBanco() {
 }
 
 function exibirResultados(resultados, total) {
+  var metadataDialog = document.getElementById("mobileMetadata");
+  if (metadataDialog.open && !resultados.some(function (q) { return q.id === currentSelectedId; })) {
+    metadataDialog.close();
+  }
   updateActiveFilterPills();
   document.getElementById("totalQuestionsCount").textContent =
     "Exibindo " + resultados.length + " de " + total + " questões cadastradas";
@@ -472,6 +529,11 @@ function renderQuestionCards(items) {
 
     return '<article class="card-custom ' + theme + " " + isSelected +
       '" onclick="selectQuestion(' + q.id + ')" data-id="' + q.id + '">' +
+      '<button type="button" class="mobile-only mobile-question" aria-haspopup="dialog" aria-controls="mobileMetadata" ' +
+      'onclick="event.stopPropagation(); selectQuestion(' + q.id + ', this)">' +
+      '<span class="mobile-question-context">' + esc(q.edicaoAno || "—") + " · " + esc(q.phase) + "</span>" +
+      "<strong>" + esc((q.category === "Tarefa" ? "Tarefa " : "Questão ") + q.num) + "</strong>" +
+      '<span class="mobile-question-preview">' + esc(q.descShort) + "</span></button>" +
       '<div class="card-header">' +
       '<span class="text-[10px] font-bold text-gray-200 uppercase bg-black/40 px-2.5 py-1 rounded border border-white/10 backdrop-blur-sm">' +
       "ONHB · " + esc(q.edicaoAno || "—") + " · " + esc(q.phase) + "</span>" +
@@ -497,7 +559,7 @@ function renderQuestionCards(items) {
   }).join("");
 }
 
-function selectQuestion(id) {
+function selectQuestion(id, mobileTrigger) {
   currentSelectedId = id;
   var q = encontrarQuestao(id);
   if (!q) return;
@@ -528,6 +590,11 @@ function selectQuestion(id) {
           esc(t) + "</span>";
       }).join("")
     : '<span class="text-gray-500 text-[10px] italic">Sem tags</span>';
+  if (mobileTrigger && mobileLayout.matches) {
+    mobileQuestionTrigger = mobileTrigger;
+    mobileTrigger.focus({ preventScroll: true });
+    openMobilePanel("mobileMetadata", "metadataPanel");
+  }
 }
 
 function renderPagination(totalPages) {
@@ -641,8 +708,12 @@ function openQuestionModal(id) {
     }
   }
 
+  var metadataDialog = document.getElementById("mobileMetadata");
+  var openedFromMobile = metadataDialog.open;
+  if (openedFromMobile) metadataDialog.close();
   document.getElementById("questionModal").classList.remove("hidden");
   document.body.style.overflow = "hidden";
+  if (openedFromMobile) document.getElementById("questionModalClose").focus();
 }
 
 function rotuloPontuacao(valor) {
@@ -708,6 +779,9 @@ function closeQuestionModal() {
   document.getElementById("questionModal").classList.add("hidden");
   document.body.style.overflow = "";
   modalSelectedId = null;
+  if (mobileLayout.matches && mobileQuestionTrigger && mobileQuestionTrigger.isConnected) {
+    mobileQuestionTrigger.focus({ preventScroll: true });
+  }
 }
 
 function downloadTranscription() {
